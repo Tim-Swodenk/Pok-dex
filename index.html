@@ -10,9 +10,82 @@
     <link href="./style.css" rel="stylesheet" />
     <title>Pokedex</title>
     <script src="./script.js"></script>
-    <script src="./Bootstrap/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="./Bootstrap/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   </head>
   <body onload="loadData()">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="./index.html">
+          <img
+            src="./assets/logo/pokemon-23.svg"
+            alt="Pokemon"
+            width="60"
+            height="35"
+          />
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="https://www.pokewiki.de/Hauptseite"
+                target="_blank"
+                >PokéWiki</a
+              >
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Choose Gen
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Gen 1</a></li>
+                <li><a class="dropdown-item" href="#">Gen 2</a></li>
+                <li><a class="dropdown-item" href="#">Gen 3</a></li>
+                <li><a class="dropdown-item" href="#">Gen 4</a></li>
+                <li><a class="dropdown-item" href="#">Gen 5</a></li>
+                <li><a class="dropdown-item" href="#">Gen 6</a></li>
+                <li><a class="dropdown-item" href="#">Gen 7</a></li>
+                <li><a class="dropdown-item" href="#">Gen 8</a></li>
+                <li><a class="dropdown-item" href="#">Gen 9</a></li>
+              </ul>
+            </li>
+          </ul>
+          <form class="d-flex" role="search" onsubmit="return false;">
+            <input
+              class="form-control me-2"
+              type="search"
+              placeholder="Search name or #ID"
+              aria-label="Search"
+              onkeyup="searchPokemon(this.value)"
+            />
+            <button
+              class="btn btn-outline-success"
+              type="submit"
+              onclick="searchPokemon()"
+            >
+              Search
+            </button>
+          </form>
+        </div>
+      </div>
+    </nav>
     <div class="container-fluid">
       <div class="container text-center"></div>
       <div class="row row-cols-2 row-cols-lg-4 g-2 g-lg-4" id="layout"></div>
