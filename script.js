@@ -1,8 +1,11 @@
-let maxLoadedPokemon = 1;
+let maxLoadedPokemon = 500;
 
 const BASE_URL = `https://pokeapi.co/api/v2/pokemon?limit=${maxLoadedPokemon}&offset=0`;
 
 let allPokemonDetails = [];
+let displayedPokemonCount = 0; //Aktuelle angezeigte Anzahl
+let initialLoadCount = 20; // Wieviele am Anfang angeziegt werden sollen
+let incrementCount = 20; // Anzahl der weiter zu ladenen
 let colours = {
   normal: "#A8A77A",
   fire: "#EE8130",
@@ -50,16 +53,14 @@ async function loadData() {
     let data = await getPokemons();
     let pokemons = data.results;
 
-    // Eizelne URL der Pokemon holen und laden
-    for (let pokemon of pokemons) {
-      try {
-        let details = await fetchPokemonDetails(pokemon.url);
-        allPokemonDetails.push(details);
-        renderPokemon(details);
-      } catch (error) {
-        console.error("Fehler beim Laden der Pokémon-Details:", error);
-      }
-    }
+    // Paralleles Laden der Pokemon-Details
+    let pokemonDetailsPromises = pokemons.map((pokemon) =>
+      fetchPokemonDetails(pokemon.url)
+    );
+    allPokemonDetails = await Promise.all(pokemonDetailsPromises);
+
+    // Zeigt die ersten 20 POkemon an
+    renderPokemonBatch(initialLoadCount);
   } catch (error) {
     console.error("Fehler beim Laden der Pokemon-Daten:", error);
   }
@@ -81,6 +82,15 @@ async function fetchPokemonDetails(url) {
   return await response.json();
 }
 
+function renderPokemonBatch(count) {
+  const pokemonsToRender = allPokemonDetails.slice(
+    displayedPokemonCount,
+    displayedPokemonCount + count
+  );
+  pokemonsToRender.forEach(renderPokemon);
+  displayedPokemonCount += count;
+}
+
 function renderPokemon(pokemon) {
   let pokemonName = pokemon.forms[0].name;
   let pokemonImage = pokemon.sprites.front_default;
@@ -91,8 +101,6 @@ function renderPokemon(pokemon) {
   let hasTwoTypes = false;
   let imgPokemonType2 = null;
   let pokemonType2 = null;
-
-  console.log(pokemon);
 
   if (pokemon.types.length == 2) {
     imgPokemonType2 = types[pokemon.types[1].type.name];
@@ -112,6 +120,16 @@ function renderPokemon(pokemon) {
     hasTwoTypes
   );
 }
+
+function loadMorePokemon() {
+  renderPokemonBatch(incrementCount);
+
+  // Button verstecken wenn alle geladen
+  if (displayedPokemonCount >= allPokemonDetails.length) {
+    document.getElementById("load-more-btn").style.display = "none";
+  }
+}
+
 function firstLetterCap(pokemonName) {
   let capitalized = pokemonName.charAt(0).toUpperCase() + pokemonName.slice(1);
 
@@ -119,17 +137,42 @@ function firstLetterCap(pokemonName) {
 }
 
 function searchPokemon(query) {
-  query = query.toLowerCase();
+  document.getElementById("loadingSpinner").style.display = "block"; // Ladesymbol einblenden
+  document.getElementById("load-more-btn").style.display = "none"; // Button mehr Pokemon ausblenden
+
+  setTimeout(() => {
+    if (typeof query !== "string") {
+      document.getElementById("loadingSpinner").style.display = "none"; // Ladesymbol ausblenden
+      return;
+    }
+
+    query = query.toLowerCase();
+    document.getElementById("layout").innerHTML = "";
+
+    if (query === "") {
+      resetDisplay();
+      document.getElementById("loadingSpinner").style.display = "none"; // Ladesymbol ausblenden
+
+      return;
+    }
+
+    let filteredPokemons = allPokemonDetails.filter((pokemon) => {
+      return (
+        pokemon.forms[0].name.toLowerCase().startsWith(query) ||
+        `#${pokemon.id}`.startsWith(query)
+      );
+    });
+    filteredPokemons.forEach(renderPokemon);
+
+    document.getElementById("loadingSpinner").style.display = "none"; // Ladesymbol ausblenden
+  }, 100); // Verzögerung von 100 ms
+}
+
+function resetDisplay() {
   document.getElementById("layout").innerHTML = "";
-
-  let filteredPokemons = allPokemonDetails.filter((pokemon) => {
-    return (
-      pokemon.forms[0].name.toLowerCase().startsWith(query) ||
-      `#${pokemon.id}`.startsWith(query)
-    );
-  });
-
-  filteredPokemons.forEach((pokemon) => renderPokemon(pokemon));
+  displayedPokemonCount = 0;
+  renderPokemonBatch(20);
+  document.getElementById("load-more-btn").style.display = "block"; // Button mehr Pokemon einblenden
 }
 
 function renderHtml(

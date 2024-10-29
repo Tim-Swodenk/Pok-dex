@@ -151,3 +151,16 @@
   display: flex;
   width: 80px;
 }
+
+.loading-spinner {
+  display: none;
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  > img {
+    width: 160px;
+    opacity: 0.9;
+  }
+}

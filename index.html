@@ -13,6 +13,10 @@
     <script src="./Bootstrap/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   </head>
   <body onload="loadData()">
+    <div id="loadingSpinner" class="loading-spinner">
+      <img src="./assets/logo/pokemon-pokeball.gif" alt="Lädt..." />
+    </div>
+
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <div class="container-fluid">
         <a class="navbar-brand" href="./index.html">
@@ -90,5 +94,7 @@
       <div class="container text-center"></div>
       <div class="row row-cols-2 row-cols-lg-4 g-2 g-lg-4" id="layout"></div>
     </div>
+    <div id="layout"></div>
+    <button id="load-more-btn" onclick="loadMorePokemon()">Mehr laden</button>
   </body>
 </html>
