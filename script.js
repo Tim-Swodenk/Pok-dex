@@ -1,4 +1,4 @@
-let maxLoadedPokemon = 500;
+let maxLoadedPokemon = 150;
 
 const BASE_URL = `https://pokeapi.co/api/v2/pokemon?limit=${maxLoadedPokemon}&offset=0`;
 
@@ -95,6 +95,7 @@ function renderPokemon(pokemon) {
   let pokemonName = pokemon.forms[0].name;
   let pokemonImage = pokemon.sprites.front_default;
   let pokemonId = pokemon.id;
+  let formattedId = String(pokemonId).padStart(3, "0");
   let bgColor = colours[pokemon.types[0].type.name] || "#FFF";
   let imgPokemonType1 = types[pokemon.types[0].type.name];
   let pokemonType1 = pokemon.types[0].type.name;
@@ -117,7 +118,8 @@ function renderPokemon(pokemon) {
     pokemonType1,
     imgPokemonType2,
     pokemonType2,
-    hasTwoTypes
+    hasTwoTypes,
+    formattedId
   );
 }
 
@@ -156,15 +158,19 @@ function searchPokemon(query) {
       return;
     }
 
-    let filteredPokemons = allPokemonDetails.filter((pokemon) => {
-      return (
-        pokemon.forms[0].name.toLowerCase().startsWith(query) ||
-        `#${pokemon.id}`.startsWith(query)
-      );
-    });
-    filteredPokemons.forEach(renderPokemon);
+    if (query.length >= 3) {
+      let filteredPokemons = allPokemonDetails.filter((pokemon) => {
+        let pokemonId = pokemon.id;
+        let formattedId = String(pokemonId).padStart(3, "0");
+        return (
+          pokemon.forms[0].name.toLowerCase().startsWith(query) ||
+          `#${formattedId}`.startsWith(query)
+        );
+      });
+      filteredPokemons.forEach(renderPokemon);
 
-    document.getElementById("loadingSpinner").style.display = "none"; // Ladesymbol ausblenden
+      document.getElementById("loadingSpinner").style.display = "none"; // Ladesymbol ausblenden
+    }
   }, 100); // Verzögerung von 100 ms
 }
 
@@ -172,43 +178,172 @@ function resetDisplay() {
   document.getElementById("layout").innerHTML = "";
   displayedPokemonCount = 0;
   renderPokemonBatch(20);
-  document.getElementById("load-more-btn").style.display = "block"; // Button mehr Pokemon einblenden
+  document.getElementById("load-more-btn").style.display = "flex"; // Button mehr Pokemon einblenden
 }
 
 function renderHtml(
-  pokemonName,
-  pokemonImage,
-  pokemonId,
+  name,
+  image,
+  id,
   bgColor,
-  imgPokemonType1,
-  pokemonType1,
-  imgPokemonType2,
-  pokemonType2,
-  hasTwoTypes
+  imgType1,
+  type1,
+  imgType2,
+  type2,
+  hasTwoTypes,
+  formattedId
 ) {
   let content = document.getElementById("layout");
   content.innerHTML += /*html*/ `
-      <div class="col">
+      <div class="col" data-bs-toggle="offcanvas" href="#offcanvasExample" onclick="loadMoreDetails(${id}, ${hasTwoTypes})">
         <div class="p-3" style="background-color: ${bgColor}">
           <img src="./assets/logo/clipart2514739.png" class="background-image">
-          <div>#${pokemonId}</div>
+          <div>#${formattedId}</div>
           <div class="type-wrapper">
-            <div class="icon ${pokemonType1}">
-              <img src="${imgPokemonType1}"/>
+            <div class="icon ${type1}">
+              <img src="${imgType1}"/>
             </div>
             ${
               hasTwoTypes
                 ? `
-            <div class="icon ${pokemonType2}">
-              <img src="${imgPokemonType2}"/>
+            <div class="icon ${type2}">
+              <img src="${imgType2}"/>
             </div>
           `
                 : ""
             }
           </div>
-          <img class="font-image" src="${pokemonImage}" alt="">
-          <div>${firstLetterCap(pokemonName)}</div>
+          <img class="font-image" src="${image}" alt="">
+          <div>${firstLetterCap(name)}</div>
         </div>
       </div>
     `;
+}
+
+async function loadMoreDetails(pokeId) {
+  let pokemon = allPokemonDetails.find((p) => p.id === pokeId);
+
+  try {
+    let data = await fetchMoreDetails(pokemon.species.url);
+
+    loadMoreDetailsHTML(pokemon, data);
+  } catch (error) {
+    console.error("Fehler beim Laden der Pokemon-Daten:", error);
+  }
+}
+
+async function fetchMoreDetails(url) {
+  let response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`HTTP-Fehler! Status: ${response.status}`);
+  }
+  return await response.json();
+}
+
+function loadMoreDetailsHTML(pokemon, moreDetails, hasTwoTypes) {
+  let content = document.getElementById("offcanvasExample");
+
+  let pokemonId = pokemon.id;
+  let formattedId = String(pokemonId).padStart(3, "0");
+
+  content.style.backgroundColor = colours[pokemon.types[0].type.name];
+
+  content.innerHTML = /*html*/ `
+   <div class="offcanvas-header">
+   <div class="d-flex justify-content-evenly w-100">
+        <h5 class="offcanvas-title" id="offcanvasExampleLabel">${firstLetterCap(
+          pokemon.name
+        )}</h5>
+         <h5 class="offcanvas-title" id="offcanvasExampleLabel">#${formattedId}</h5>
+         </div>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="dropdown mt-3">
+          <button
+            class="btn btn-secondary dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+          >
+            Choose Details
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">About</a></li>
+            <li><a class="dropdown-item" href="#">Base Stats</a></li>
+            <li><a class="dropdown-item" href="#">Gender</a></li>
+            <li><a class="dropdown-item" href="#">Shiny</a></li>
+
+          </ul>
+        </div>
+        <div>
+          <div class="offcanvans-body-header">
+            <div class="type ${pokemon.types[0].type.name}">${
+    pokemon.types[0].type.name
+  }</div>
+            ${
+              hasTwoTypes
+                ? `
+            <div class="type ${pokemon.types[1].type.name}">${pokemon.types[1].type.name}
+            </div>
+          `
+                : ""
+            }
+  
+          
+
+          </div>
+          <div class="offcanvans-body-img">
+          <img src="${pokemon.sprites.front_default}">
+          <div>
+            <div>
+            <table class="table">
+
+  <tbody>
+    <tr>
+      <td>Categorie</td>
+      <td>${moreDetails.genera[7].genus}</td>
+    </tr>
+    <tr>
+      <td>Height</td>
+      <td>${pokemon.height / 10}m</td>
+    </tr>
+    <tr>
+      <td>Weight</td>
+      <td>${pokemon.weight / 10}kg</td>
+    </tr>
+    <tr>
+      <td>Color</td>
+      <td>${moreDetails.color.name}</td>
+    </tr>
+  
+  </tbody>
+</table>
+          </div>
+        </div>
+      </div>
+ `;
+}
+
+window.onscroll = function () {
+  scrollFunction();
+};
+
+function scrollFunction() {
+  let scrollUp = document.getElementById("scrollUp");
+
+  if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+    scrollUp.style.display = "block";
+  } else {
+    scrollUp.style.display = "none";
+  }
+}
+
+function topFunction() {
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
 }
