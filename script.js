@@ -1,11 +1,41 @@
-let maxLoadedPokemon = 150;
+let limit = 100;
 
-const BASE_URL = `https://pokeapi.co/api/v2/pokemon?limit=${maxLoadedPokemon}&offset=0`;
+let BASE_URL = `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=0`;
+
+let gen = {
+  All: { start: 0, end: 1010 },
+  "Gen 1": { start: 0, end: 151 },
+  "Gen 2": { start: 152, end: 251 },
+  "Gen 3": { start: 252, end: 386 },
+  "Gen 4": { start: 387, end: 493 },
+  "Gen 5": { start: 494, end: 649 },
+  "Gen 6": { start: 650, end: 721 },
+  "Gen 7": { start: 722, end: 809 },
+  "Gen 8": { start: 810, end: 898 },
+  "Gen 9": { start: 899, end: 1010 },
+};
 
 let allPokemonDetails = [];
 let displayedPokemonCount = 0; //Aktuelle angezeigte Anzahl
 let initialLoadCount = 20; // Wieviele am Anfang angeziegt werden sollen
 let incrementCount = 20; // Anzahl der weiter zu ladenen
+
+function chooseGen(event) {
+  const selectedGen = event.target.textContent;
+
+  let content = document.getElementById("layout");
+  content.innerHTML = "";
+  displayedPokemonCount = 0;
+
+  if (gen.hasOwnProperty(selectedGen)) {
+    const generationData = gen[selectedGen];
+
+    let NEW_URL = `https://pokeapi.co/api/v2/pokemon?limit=${generationData.end}&offset=${generationData.start}`;
+
+    loadData(NEW_URL);
+  }
+}
+
 let colours = {
   normal: "#A8A77A",
   fire: "#EE8130",
@@ -48,9 +78,10 @@ let types = {
   fairy: "./assets/pokemon-type-svg-icons-master/icons/fairy.svg",
 };
 
-async function loadData() {
+async function loadData(NEW_URL) {
+  document.getElementById("loadingSpinner").style.display = "block";
   try {
-    let data = await getPokemons();
+    let data = await getPokemons(NEW_URL);
     let pokemons = data.results;
 
     // Paralleles Laden der Pokemon-Details
@@ -63,15 +94,36 @@ async function loadData() {
     renderPokemonBatch(initialLoadCount);
   } catch (error) {
     console.error("Fehler beim Laden der Pokemon-Daten:", error);
+  } finally {
+    document.getElementById("loadingSpinner").style.display = "none";
   }
 }
 
-async function getPokemons() {
-  let response = await fetch(BASE_URL);
-  if (!response.ok) {
-    throw new Error(`HTTP-Fehler! Status: ${response.status}`);
+async function getPokemons(NEW_URL) {
+  try {
+    // Versuche fetch von NEW_URL
+    let response = await fetch(NEW_URL);
+
+    if (!response.ok) {
+      throw new Error(`HTTP-Fehler! Status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`Fehler beim Laden von NEW_URL: ${error.message}`);
+
+    // wenn error, dann die BASE_URL nutzen
+    try {
+      let fallbackResponse = await fetch(BASE_URL);
+      if (!fallbackResponse.ok) {
+        throw new Error(`HTTP-Fehler! Status: ${fallbackResponse.status}`);
+      }
+      return await fallbackResponse.json();
+    } catch (fallbackError) {
+      console.error(`Fehler beim Laden von BASE_URL: ${fallbackError.message}`);
+      throw fallbackError;
+    }
   }
-  return await response.json();
 }
 
 async function fetchPokemonDetails(url) {
@@ -306,7 +358,7 @@ function loadMoreDetailsHTML(pokemon, moreDetails, hasTwoTypes) {
   <tbody>
     <tr>
       <td>Categorie</td>
-      <td>${moreDetails.genera[7].genus}</td>
+      <td>${moreDetails.genera[4].genus}</td>
     </tr>
     <tr>
       <td>Height</td>
@@ -347,3 +399,5 @@ function topFunction() {
   document.body.scrollTop = 0;
   document.documentElement.scrollTop = 0;
 }
+
+function findRightId(params) {}
