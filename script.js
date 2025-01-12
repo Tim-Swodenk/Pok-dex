@@ -44,6 +44,7 @@ export function chooseGen(event) {
     loadData(NEW_URL);
   }
 }
+sdsdsd;
 
 export async function loadData(URL) {
   toggleLoadingState(true);
