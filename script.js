@@ -1,4 +1,14 @@
-let limit = 1010;
+window.loadData = loadData;
+window.chooseGen = chooseGen;
+window.searchPokemon = searchPokemon;
+window.loadMorePokemon = loadMorePokemon;
+window.scrollTopFunction = scrollTopFunction;
+window.loadMoreDetails = loadMoreDetails;
+
+import { renderPokemon } from "./templates.js";
+import { loadMoreDetailsHTMLContent } from "./templates.js";
+
+let limit = 100;
 let allPokemonDetails = [];
 let displayedPokemonCount = 0;
 let initialLoadCount = 20;
@@ -19,28 +29,7 @@ let gen = {
   "Gen 9": { start: 899, end: 1010 },
 };
 
-let types = {
-  normal: "./assets/pokemon-type-svg-icons-master/icons/normal.svg",
-  fire: "./assets/pokemon-type-svg-icons-master/icons/fire.svg",
-  water: "./assets/pokemon-type-svg-icons-master/icons/water.svg",
-  electric: "./assets/pokemon-type-svg-icons-master/icons/electric.svg",
-  grass: "./assets/pokemon-type-svg-icons-master/icons/grass.svg",
-  ice: "./assets/pokemon-type-svg-icons-master/icons/ice.svg",
-  fighting: "./assets/pokemon-type-svg-icons-master/icons/fighting.svg",
-  poison: "./assets/pokemon-type-svg-icons-master/icons/poison.svg",
-  ground: "./assets/pokemon-type-svg-icons-master/icons/ground.svg",
-  flying: "./assets/pokemon-type-svg-icons-master/icons/flying.svg",
-  psychic: "./assets/pokemon-type-svg-icons-master/icons/psychic.svg",
-  bug: "./assets/pokemon-type-svg-icons-master/icons/bug.svg",
-  rock: "./assets/pokemon-type-svg-icons-master/icons/rock.svg",
-  ghost: "./assets/pokemon-type-svg-icons-master/icons/ghost.svg",
-  dragon: "./assets/pokemon-type-svg-icons-master/icons/dragon.svg",
-  dark: "./assets/pokemon-type-svg-icons-master/icons/dark.svg",
-  steel: "./assets/pokemon-type-svg-icons-master/icons/steel.svg",
-  fairy: "./assets/pokemon-type-svg-icons-master/icons/fairy.svg",
-};
-
-function chooseGen(event) {
+export function chooseGen(event) {
   const selectedGen = event.target.textContent;
 
   let content = document.getElementById("layout");
@@ -56,11 +45,12 @@ function chooseGen(event) {
   }
 }
 
-async function loadData(NEW_URL) {
+export async function loadData(URL) {
   toggleLoadingState(true);
+  console.log(URL);
 
   try {
-    const data = await getPokemons(NEW_URL);
+    const data = await getPokemons(URL);
     const pokemonDetailsPromises = data.results.map((pokemon) =>
       fetchPokemonDetails(pokemon.url)
     );
@@ -73,11 +63,47 @@ async function loadData(NEW_URL) {
     toggleLoadingState(false);
   }
 }
+
+export function searchPokemon(query) {
+  toggleLoadingState(true);
+
+  setTimeout(() => {
+    if (typeof query !== "string" || query.trim() === "") {
+      resetDisplay();
+      document.getElementById("loadingSpinner").style.display = "none";
+      document.getElementById("footer").style.position = "relative";
+      return;
+    }
+    query = query.toLowerCase();
+    document.getElementById("layout").innerHTML = "";
+
+    if (query.length >= 3) {
+      const filteredPokemons = allPokemonDetails.filter((pokemon) => {
+        const pokemonId = String(pokemon.id).padStart(3, "0");
+        document.getElementById("loadingSpinner").style.display = "none";
+        document.getElementById("footer").style.position = "relative";
+        return (
+          pokemon.forms[0].name.toLowerCase().startsWith(query) ||
+          `#${pokemonId}`.startsWith(query)
+        );
+      });
+
+      filteredPokemons.forEach((pokemon) =>
+        renderPokemon(pokemon, loadMoreDetails)
+      );
+    }
+  }, 100); // Verzögerung von 100 ms
+}
+
+export function scrollTopFunction() {
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+}
 //hier entsteht der error aufgrund der möglichen gen URL
-async function getPokemons(NEW_URL) {
+async function getPokemons(URL) {
   try {
     // Versuche fetch von NEW_URL
-    let response = await fetch(NEW_URL);
+    let response = await fetch(URL);
 
     if (!response.ok) {
       throw new Error(`HTTP-Fehler! Status: ${response.status}`);
@@ -114,7 +140,9 @@ function renderPokemonBatch(count) {
     displayedPokemonCount,
     displayedPokemonCount + count
   );
-  pokemonsToRender.forEach(renderPokemon);
+  pokemonsToRender.forEach((pokemon) =>
+    renderPokemon(pokemon, loadMoreDetails)
+  );
   displayedPokemonCount += count;
 }
 
@@ -126,79 +154,7 @@ function loadMorePokemon() {
   }
 }
 
-function firstLetterCap(pokemonName) {
-  let capitalized = pokemonName.charAt(0).toUpperCase() + pokemonName.slice(1);
-
-  return capitalized;
-}
-
-function searchPokemon(query) {
-  toggleLoadingState(true);
-
-  setTimeout(() => {
-    if (typeof query !== "string" || query.trim() === "") {
-      resetDisplay();
-      document.getElementById("loadingSpinner").style.display = "none";
-      document.getElementById("footer").style.position = "relative";
-      return;
-    }
-    query = query.toLowerCase();
-    document.getElementById("layout").innerHTML = "";
-
-    if (query.length >= 3) {
-      const filteredPokemons = allPokemonDetails.filter((pokemon) => {
-        const pokemonId = String(pokemon.id).padStart(3, "0");
-        document.getElementById("loadingSpinner").style.display = "none";
-        document.getElementById("footer").style.position = "relative";
-        return (
-          pokemon.forms[0].name.toLowerCase().startsWith(query) ||
-          `#${pokemonId}`.startsWith(query)
-        );
-      });
-
-      filteredPokemons.forEach(renderPokemon);
-    }
-  }, 100); // Verzögerung von 100 ms
-}
-
-function resetDisplay() {
-  document.getElementById("layout").innerHTML = "";
-  displayedPokemonCount = 0;
-  renderPokemonBatch(20);
-  document.getElementById("load-more-btn").style.display = "flex";
-}
-// zu lang (html)
-function renderPokemon(pokemon) {
-  let content = document.getElementById("layout");
-
-  content.innerHTML += /*html*/ `
-      <div class="col" data-bs-toggle="offcanvas" href="#offcanvasExample" onclick="loadMoreDetails(
-      ${pokemon.id})">
-        <div class="p-3 ${pokemon.types[0].type.name}-bg">
-          <img src="./assets/img/pokeball-bg-card.png" class="background-image">
-          <div>#${String(pokemon.id).padStart(3, "0")}</div>
-          <div class="type-wrapper">
-            <div class="icon ${pokemon.types[0].type.name}">
-              <img src="${types[pokemon.types[0].type.name]}"/>
-            </div>
-            ${
-              pokemon.types.length == 2
-                ? `
-            <div class="icon ${pokemon.types[1].type.name}">
-              <img src="${types[pokemon.types[1].type.name]}"/>
-            </div>
-          `
-                : ""
-            }
-          </div>
-          <img class="font-image" src="${pokemon.sprites.front_default}" alt="">
-          <div>${firstLetterCap(pokemon.forms[0].name)}</div>
-        </div>
-      </div>
-    `;
-}
-
-async function loadMoreDetails(pokeId) {
+export async function loadMoreDetails(pokeId) {
   if (pokeId == 0) {
     pokeId++;
     return;
@@ -222,85 +178,20 @@ async function fetchMoreDetails(url) {
   }
   return await response.json();
 }
-// zu lang (html)
+
 function loadMoreDetailsHTML(pokemon, moreDetails) {
   let content = document.getElementById("offcanvasExample");
 
   removeBG(content, pokemon);
 
-  content.innerHTML = /*html*/ `
-   <div class="offcanvas-header">
-   <div class="d-flex justify-content-evenly w-100">
-        <h5 class="offcanvas-title" id="offcanvasExampleLabel">${firstLetterCap(
-          pokemon.name
-        )}</h5>
-         <h5 class="offcanvas-title" id="offcanvasExampleLabel">#${String(
-           pokemon.id
-         ).padStart(3, "0")}</h5>
-         </div>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="offcanvas"
-          aria-label="Close"
-        ></button>
-      </div>
-      <div class="offcanvas-body">
-        <div>
-          <div class="offcanvas-navigation-arrows">
-          <img onclick="loadMoreDetails(
-          ${pokemon.id - 1})" class="img-left" src="./assets/img/arrow.png" />
-<img onclick="loadMoreDetails(${
-    pokemon.id + 1
-  })" class="img-right" src="./assets/img/arrow.png" />
+  content.innerHTML = loadMoreDetailsHTMLContent(pokemon, moreDetails);
+}
 
-          </div>
-          <div class="offcanvans-body-header">
-            <div class="type ${pokemon.types[0].type.name}">${
-    pokemon.types[0].type.name
-  }</div>
-            ${
-              pokemon.types.length == 2
-                ? `
-            <div class="type ${pokemon.types[1].type.name}">${pokemon.types[1].type.name}
-            </div>
-          `
-                : ""
-            }
-  
-          
-
-          </div>
-          <div class="offcanvans-body-img">
-          <img src="${pokemon.sprites.front_default}">
-          <div>
-            <div>
-            <table class="table">
-
-  <tbody>
-    <tr>
-      <td>Categorie</td>
-      <td>${moreDetails.genera[7].genus}</td>
-    </tr>
-    <tr>
-      <td>Height</td>
-      <td>${pokemon.height / 10}m</td>
-    </tr>
-    <tr>
-      <td>Weight</td>
-      <td>${pokemon.weight / 10}kg</td>
-    </tr>
-    <tr>
-      <td>Color</td>
-      <td>${moreDetails.color.name}</td>
-    </tr>
-  
-  </tbody>
-</table>
-          </div>
-        </div>
-      </div>
- `;
+function resetDisplay() {
+  document.getElementById("layout").innerHTML = "";
+  displayedPokemonCount = 0;
+  renderPokemonBatch(20);
+  document.getElementById("load-more-btn").style.display = "flex";
 }
 
 window.onscroll = function () {
@@ -317,20 +208,6 @@ function scrollFunction() {
   }
 }
 
-function topFunction() {
-  document.body.scrollTop = 0;
-  document.documentElement.scrollTop = 0;
-}
-
-function removeBG(content, pokemon) {
-  content.classList.forEach((className) => {
-    if (className.endsWith("-bg")) {
-      content.classList.remove(className);
-    }
-  });
-  content.classList.add(`${pokemon.types[0].type.name}-bg`);
-}
-
 function toggleLoadingState(isLoading) {
   document.getElementById("loadingSpinner").style.display = isLoading
     ? "block"
@@ -341,4 +218,13 @@ function toggleLoadingState(isLoading) {
   document.getElementById("footer").style.position = isLoading
     ? "absolute"
     : "relative";
+}
+
+function removeBG(content, pokemon) {
+  content.classList.forEach((className) => {
+    if (className.endsWith("-bg")) {
+      content.classList.remove(className);
+    }
+  });
+  content.classList.add(`${pokemon.types[0].type.name}-bg`);
 }

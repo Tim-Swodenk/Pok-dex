@@ -1,5 +1,5 @@
 
-fhelermeldungen bearbeiten
+fehlermeldungen bearbeiten
 
 
 template.js erstellen und html auslager 

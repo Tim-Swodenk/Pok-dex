@@ -13,9 +13,15 @@
       rel="stylesheet"
     />
     <link href="./style.css" rel="stylesheet" />
-    <title>Pokédex</title>
-    <script src="./script.js"></script>
+    <script type="module" src="./script.js">
+      import { loadData } from './script.js';
+      import { chooseGen } from './script.js';
+      import { searchPokemon } from './script.js';
+      import { loadMorePokemon } from './script.js';
+      import { scrollTopFunction } from './script.js';
+    </script>
     <script src="./Bootstrap/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <title>Pokédex</title>
   </head>
   <body onload="loadData()">
     <!--Ladeanzeige wenn gesucht wird-->
@@ -195,7 +201,7 @@
       <p>Click to load more...</p>
     </div>
     <div class="go-to-top" id="scrollUp">
-      <img onclick="topFunction()" src="./assets/img/arrow.png" />
+      <img onclick="scrollTopFunction()" src="./assets/img/arrow.png" />
     </div>
     <!--Footer-->
     <footer class="bg-light text-center" id="footer">
