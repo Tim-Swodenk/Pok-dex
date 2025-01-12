@@ -44,14 +44,14 @@ export function chooseGen(event) {
     loadData(NEW_URL);
   }
 }
-sdsdsd;
 
 export async function loadData(URL) {
+  let url = URL == undefined ? BASE_URL : URL;
+
   toggleLoadingState(true);
-  console.log(URL);
 
   try {
-    const data = await getPokemons(URL);
+    const data = await getPokemons(url);
     const pokemonDetailsPromises = data.results.map((pokemon) =>
       fetchPokemonDetails(pokemon.url)
     );
@@ -100,31 +100,17 @@ export function scrollTopFunction() {
   document.body.scrollTop = 0;
   document.documentElement.scrollTop = 0;
 }
-//hier entsteht der error aufgrund der möglichen gen URL
-async function getPokemons(URL) {
+
+async function getPokemons(url) {
   try {
-    // Versuche fetch von NEW_URL
-    let response = await fetch(URL);
-
-    if (!response.ok) {
-      throw new Error(`HTTP-Fehler! Status: ${response.status}`);
+    let fallbackResponse = await fetch(url);
+    if (!fallbackResponse.ok) {
+      throw new Error(`HTTP-Fehler! Status: ${fallbackResponse.status}`);
     }
-
-    return await response.json();
-  } catch (error) {
-    console.error(`Fehler beim Laden von NEW_URL: ${error.message}`);
-
-    // wenn error, dann die BASE_URL nutzen
-    try {
-      let fallbackResponse = await fetch(BASE_URL);
-      if (!fallbackResponse.ok) {
-        throw new Error(`HTTP-Fehler! Status: ${fallbackResponse.status}`);
-      }
-      return await fallbackResponse.json();
-    } catch (fallbackError) {
-      console.error(`Fehler beim Laden von BASE_URL: ${fallbackError.message}`);
-      throw fallbackError;
-    }
+    return await fallbackResponse.json();
+  } catch (fallbackError) {
+    console.error(`Fehler beim Laden von BASE_URL: ${fallbackError.message}`);
+    throw fallbackError;
   }
 }
 
