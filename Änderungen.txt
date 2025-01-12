@@ -1,0 +1,7 @@
+
+fhelermeldungen bearbeiten
+
+
+template.js erstellen und html auslager 
+
+in den letzten gen fehler beim laden und kategorie falsch angezeigt

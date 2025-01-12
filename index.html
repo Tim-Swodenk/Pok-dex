@@ -3,7 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/x-icon" href="./assets/1.png" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="./assets/img/pokeball-load-more/fav-icon.png"
+    />
     <link
       href="./Bootstrap/node_modules/bootstrap/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -16,14 +20,14 @@
   <body onload="loadData()">
     <!--Ladeanzeige wenn gesucht wird-->
     <div id="loadingSpinner" class="loading-spinner">
-      <img src="./assets/logo/pokemon-pokeball.gif" alt="Lädt..." />
+      <img src="./assets/img/pokeball-loading.gif" alt="Lädt..." />
     </div>
     <!--Nav Bar-->
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <div class="container-fluid">
         <a class="navbar-brand" href="./index.html">
           <img
-            src="./assets/logo/pokemon-23.svg"
+            src="./assets/img/pokemon-logo-nav.svg"
             alt="Pokemon"
             width="60"
             height="35"
@@ -187,14 +191,14 @@
     ></div>
     <!--Mehr Pokemon laden-->
     <div class="load-more" id="load-more-btn" onclick="loadMorePokemon()">
-      <img src="./assets/1.png" />
+      <img src="./assets/img/pokeball-load-more/fav-icon.png" />
       <p>Click to load more...</p>
     </div>
     <div class="go-to-top" id="scrollUp">
-      <img onclick="topFunction()" src="./assets/icons8-scroll-up-100.png" />
+      <img onclick="topFunction()" src="./assets/img/arrow.png" />
     </div>
     <!--Footer-->
-    <footer class="bg-light text-center">
+    <footer class="bg-light text-center" id="footer">
       <div class="container p-5 pb-0">
         <section class="">
           <form action="">
@@ -225,9 +229,9 @@
       </div>
 
       <div class="text-center p-4" style="background-color: rgba(0, 0, 0, 0.2)">
-        <a class="text-dark" href="#">Datenschutz</a>
+        <a class="text-dark" href="./datenschutz.html">Datenschutz</a>
         <div>•</div>
-        <a class="text-dark" href="#">Impressum</a>
+        <a class="text-dark" href="./impressum.html">Impressum</a>
       </div>
     </footer>
   </body>
