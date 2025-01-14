@@ -320,6 +320,16 @@ footer {
 @media (max-width: 600px) {
   .offcanvas.offcanvas-start {
     width: 200px;
+    align-items: center;
+    font-size: 12px;
+  }
+
+  .type {
+    width: 80px;
+  }
+
+  h5 {
+    font-size: 1.25em;
   }
 }
 
@@ -327,20 +337,29 @@ footer {
   display: flex;
   justify-content: space-between;
   height: 96px;
-
-  > img:hover {
-    cursor: pointer;
-  }
 }
 
 .img-left {
   transform: rotate(-90deg) scale(0.7);
+}
+.img-left:hover {
+  cursor: pointer;
+  transform: rotate(-90deg) scale(0.8);
 }
 
 .img-right {
   transform: rotate(90deg) scale(0.7);
 }
 
+.img-right:hover {
+  cursor: pointer;
+  transform: rotate(90deg) scale(0.8);
+}
+
 .g-lg-4 {
   min-height: 70vh;
+}
+
+.hide {
+  display: none;
 }

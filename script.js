@@ -5,14 +5,14 @@ window.loadMorePokemon = loadMorePokemon;
 window.scrollTopFunction = scrollTopFunction;
 window.loadMoreDetails = loadMoreDetails;
 
-import { renderPokemon } from "./templates.js";
+import { renderPokemonHTML } from "./templates.js";
 import { loadMoreDetailsHTMLContent } from "./templates.js";
 
-let limit = 100;
+let limit = 1010;
 let allPokemonDetails = [];
 let displayedPokemonCount = 0;
-let initialLoadCount = 20;
-let incrementCount = 20;
+let initialLoadCount = 40;
+let incrementCount = 40;
 
 let BASE_URL = `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=0`;
 
@@ -27,6 +27,27 @@ let gen = {
   "Gen 7": { start: 722, end: 809 },
   "Gen 8": { start: 810, end: 898 },
   "Gen 9": { start: 899, end: 1010 },
+};
+
+let types = {
+  normal: "./assets/pokemon-type-svg-icons-master/icons/normal.svg",
+  fire: "./assets/pokemon-type-svg-icons-master/icons/fire.svg",
+  water: "./assets/pokemon-type-svg-icons-master/icons/water.svg",
+  electric: "./assets/pokemon-type-svg-icons-master/icons/electric.svg",
+  grass: "./assets/pokemon-type-svg-icons-master/icons/grass.svg",
+  ice: "./assets/pokemon-type-svg-icons-master/icons/ice.svg",
+  fighting: "./assets/pokemon-type-svg-icons-master/icons/fighting.svg",
+  poison: "./assets/pokemon-type-svg-icons-master/icons/poison.svg",
+  ground: "./assets/pokemon-type-svg-icons-master/icons/ground.svg",
+  flying: "./assets/pokemon-type-svg-icons-master/icons/flying.svg",
+  psychic: "./assets/pokemon-type-svg-icons-master/icons/psychic.svg",
+  bug: "./assets/pokemon-type-svg-icons-master/icons/bug.svg",
+  rock: "./assets/pokemon-type-svg-icons-master/icons/rock.svg",
+  ghost: "./assets/pokemon-type-svg-icons-master/icons/ghost.svg",
+  dragon: "./assets/pokemon-type-svg-icons-master/icons/dragon.svg",
+  dark: "./assets/pokemon-type-svg-icons-master/icons/dark.svg",
+  steel: "./assets/pokemon-type-svg-icons-master/icons/steel.svg",
+  fairy: "./assets/pokemon-type-svg-icons-master/icons/fairy.svg",
 };
 
 export function chooseGen(event) {
@@ -67,33 +88,54 @@ export async function loadData(URL) {
 
 export function searchPokemon(query) {
   toggleLoadingState(true);
+  timeoutFunction(query);
+}
 
+function timeoutFunction(query) {
   setTimeout(() => {
-    if (typeof query !== "string" || query.trim() === "") {
-      resetDisplay();
+    searchNoString(query);
+    removeContent();
+    searchforPokemon(lowerCase(query));
+  }, 100);
+}
+
+function removeContent() {
+  document.getElementById("layout").innerHTML = "";
+}
+
+function lowerCase(query) {
+  return query.toLowerCase();
+}
+
+function searchNoString(query) {
+  if (typeof query !== "string" || query.trim() === "") {
+    resetDisplay();
+    document.getElementById("loadingSpinner").style.display = "none";
+    document.getElementById("footer").style.position = "relative";
+    document.getElementById("load-more-btn").style.display = "none";
+  }
+}
+
+function searchforPokemon(query) {
+  if (query.length >= 3) {
+    const filteredPokemons = allPokemonDetails.filter((pokemon) => {
+      const pokemonId = String(pokemon.id).padStart(3, "0");
       document.getElementById("loadingSpinner").style.display = "none";
       document.getElementById("footer").style.position = "relative";
-      return;
-    }
-    query = query.toLowerCase();
-    document.getElementById("layout").innerHTML = "";
-
-    if (query.length >= 3) {
-      const filteredPokemons = allPokemonDetails.filter((pokemon) => {
-        const pokemonId = String(pokemon.id).padStart(3, "0");
-        document.getElementById("loadingSpinner").style.display = "none";
-        document.getElementById("footer").style.position = "relative";
-        return (
-          pokemon.forms[0].name.toLowerCase().startsWith(query) ||
-          `#${pokemonId}`.startsWith(query)
-        );
-      });
-
-      filteredPokemons.forEach((pokemon) =>
-        renderPokemon(pokemon, loadMoreDetails)
+      return (
+        pokemon.forms[0].name.toLowerCase().startsWith(query) ||
+        `#${pokemonId}`.startsWith(query)
       );
-    }
-  }, 100); // Verzögerung von 100 ms
+    });
+
+    filterPokemons(filteredPokemons);
+  }
+}
+
+function filterPokemons(filteredPokemons) {
+  filteredPokemons.forEach((pokemon) =>
+    renderPokemon(pokemon, loadMoreDetails)
+  );
 }
 
 export function scrollTopFunction() {
@@ -141,20 +183,37 @@ function loadMorePokemon() {
   }
 }
 
-export async function loadMoreDetails(pokeId) {
-  if (pokeId == 0) {
-    pokeId++;
-    return;
-  }
+function renderPokemon(pokemon, loadMoreDetails) {
+  let content = document.getElementById("layout");
 
+  content.innerHTML += renderPokemonHTML(pokemon, loadMoreDetails, types);
+}
+
+export async function loadMoreDetails(pokeId) {
   let pokemon = allPokemonDetails.find((p) => p.id === pokeId);
 
   try {
     let data = await fetchMoreDetails(pokemon.species.url);
 
     loadMoreDetailsHTML(pokemon, data);
+    toggleArrowsVisibility(pokeId);
   } catch (error) {
     console.error("Fehler beim Laden der Pokemon-Daten:", error);
+  }
+}
+
+function toggleArrowsVisibility(pokeId) {
+  if (pokeId === 1) {
+    document.getElementById("arrow-left").style.display = "none";
+    document.getElementById("arrows-wrapper").style.justifyContent = "flex-end";
+  } else {
+    document.getElementById("arrow-left").style.display = "block";
+  }
+
+  if (pokeId === 1010) {
+    document.getElementById("arrow-right").style.display = "none";
+  } else {
+    document.getElementById("arrow-right").style.display = "block";
   }
 }
 
@@ -169,11 +228,8 @@ async function fetchMoreDetails(url) {
 
 function loadMoreDetailsHTML(pokemon, moreDetails) {
   let content = document.getElementById("offcanvasExample");
-
   let genreaData = moreDetails.genera;
-
   const filtered = genreaData.filter((item) => item.language.name == "en");
-
   let categorie = filtered.map((item) => item.genus);
 
   removeBG(content, pokemon);
@@ -181,7 +237,8 @@ function loadMoreDetailsHTML(pokemon, moreDetails) {
   content.innerHTML = loadMoreDetailsHTMLContent(
     pokemon,
     moreDetails,
-    categorie
+    categorie,
+    types
   );
 }
 

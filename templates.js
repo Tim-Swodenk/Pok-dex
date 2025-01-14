@@ -1,31 +1,8 @@
-window.renderPokemon = renderPokemon;
+window.renderPokemonHTML = renderPokemonHTML;
 window.loadMoreDetailsHTMLContent = loadMoreDetailsHTMLContent;
 
-let types = {
-  normal: "./assets/pokemon-type-svg-icons-master/icons/normal.svg",
-  fire: "./assets/pokemon-type-svg-icons-master/icons/fire.svg",
-  water: "./assets/pokemon-type-svg-icons-master/icons/water.svg",
-  electric: "./assets/pokemon-type-svg-icons-master/icons/electric.svg",
-  grass: "./assets/pokemon-type-svg-icons-master/icons/grass.svg",
-  ice: "./assets/pokemon-type-svg-icons-master/icons/ice.svg",
-  fighting: "./assets/pokemon-type-svg-icons-master/icons/fighting.svg",
-  poison: "./assets/pokemon-type-svg-icons-master/icons/poison.svg",
-  ground: "./assets/pokemon-type-svg-icons-master/icons/ground.svg",
-  flying: "./assets/pokemon-type-svg-icons-master/icons/flying.svg",
-  psychic: "./assets/pokemon-type-svg-icons-master/icons/psychic.svg",
-  bug: "./assets/pokemon-type-svg-icons-master/icons/bug.svg",
-  rock: "./assets/pokemon-type-svg-icons-master/icons/rock.svg",
-  ghost: "./assets/pokemon-type-svg-icons-master/icons/ghost.svg",
-  dragon: "./assets/pokemon-type-svg-icons-master/icons/dragon.svg",
-  dark: "./assets/pokemon-type-svg-icons-master/icons/dark.svg",
-  steel: "./assets/pokemon-type-svg-icons-master/icons/steel.svg",
-  fairy: "./assets/pokemon-type-svg-icons-master/icons/fairy.svg",
-};
-
-export function renderPokemon(pokemon, loadMoreDetails) {
-  let content = document.getElementById("layout");
-
-  content.innerHTML += /*html*/ `
+export function renderPokemonHTML(pokemon, loadMoreDetails, types) {
+  return /*html*/ `
         <div class="col" data-bs-toggle="offcanvas" href="#offcanvasExample" onclick="loadMoreDetails(
         ${pokemon.id})">
           <div class="p-3 ${pokemon.types[0].type.name}-bg">
@@ -74,12 +51,14 @@ export function loadMoreDetailsHTMLContent(pokemon, moreDetails, categorie) {
         </div>
         <div class="offcanvas-body">
           <div>
-            <div class="offcanvas-navigation-arrows">
+            <div class="offcanvas-navigation-arrows" id="arrows-wrapper">
             <img onclick="loadMoreDetails(
-            ${pokemon.id - 1})" class="img-left" src="./assets/img/arrow.png" />
+            ${
+              pokemon.id - 1
+            })" class="img-left" id="arrow-left" src="./assets/img/arrow.png" />
   <img onclick="loadMoreDetails(${
     pokemon.id + 1
-  })" class="img-right" src="./assets/img/arrow.png" />
+  })" class="img-right" id="arrow-right" src="./assets/img/arrow.png" />
   
             </div>
             <div class="offcanvans-body-header">
