@@ -1,7 +1,3 @@
+Gen 9 fehler 
 
-fehlermeldungen bearbeiten
-
-
-template.js erstellen und html auslager 
-
-in den letzten gen fehler beim laden und kategorie falsch angezeigt
+mehrere Pokemon haben ab gen 9 (905) den namen an verschienen stellen --> im genera[0].language.name nach en suchen und dann den jeweiligen genus

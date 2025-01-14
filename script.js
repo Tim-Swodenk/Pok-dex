@@ -160,6 +160,7 @@ export async function loadMoreDetails(pokeId) {
 
 async function fetchMoreDetails(url) {
   let response = await fetch(url);
+
   if (!response.ok) {
     throw new Error(`HTTP-Fehler! Status: ${response.status}`);
   }
@@ -169,9 +170,19 @@ async function fetchMoreDetails(url) {
 function loadMoreDetailsHTML(pokemon, moreDetails) {
   let content = document.getElementById("offcanvasExample");
 
+  let genreaData = moreDetails.genera;
+
+  const filtered = genreaData.filter((item) => item.language.name == "en");
+
+  let categorie = filtered.map((item) => item.genus);
+
   removeBG(content, pokemon);
 
-  content.innerHTML = loadMoreDetailsHTMLContent(pokemon, moreDetails);
+  content.innerHTML = loadMoreDetailsHTMLContent(
+    pokemon,
+    moreDetails,
+    categorie
+  );
 }
 
 function resetDisplay() {

@@ -54,8 +54,8 @@ export function renderPokemon(pokemon, loadMoreDetails) {
       `;
 }
 
-export function loadMoreDetailsHTMLContent(pokemon, moreDetails) {
-  return `
+export function loadMoreDetailsHTMLContent(pokemon, moreDetails, categorie) {
+  return /*html*/ `
      <div class="offcanvas-header">
      <div class="d-flex justify-content-evenly w-100">
           <h5 class="offcanvas-title" id="offcanvasExampleLabel">${firstLetterCap(
@@ -107,7 +107,7 @@ export function loadMoreDetailsHTMLContent(pokemon, moreDetails) {
     <tbody>
       <tr>
         <td>Categorie</td>
-        <td>${moreDetails.genera[7].genus}</td>
+        <td>${categorie}</td>
       </tr>
       <tr>
         <td>Height</td>
