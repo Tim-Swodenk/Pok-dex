@@ -1,3 +1,0 @@
-Gen 9 fehler 
-
-mehrere Pokemon haben ab gen 9 (905) den namen an verschienen stellen --> im genera[0].language.name nach en suchen und dann den jeweiligen genus
